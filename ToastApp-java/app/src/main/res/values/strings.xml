@@ -7,4 +7,6 @@
     <string name="button_up">Up</string>
     <string name="button_right">Right</string>
     <string name="button_down">Down</string>
+    <string name="app_description">This app tests some Toast functionalities.
+        <p>So: 1: Press fire a toast to build and show a simple toast; 2. Press fire a custom toast to build and show a custom toast; 3. Press up, down, left, or right buttons to move the last toast built around.</p> </string>
 </resources>

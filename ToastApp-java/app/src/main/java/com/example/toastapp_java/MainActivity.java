@@ -1,6 +1,7 @@
 package com.example.toastapp_java;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,16 +11,21 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-public class MainActivity extends AppCompatActivity {
-    private Toast toast;
-    private int posX, posY;
-    private final int SIMPLE_TOAST = 0;
-    private final int CUSTOM_TOAST = 1;
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+    private final String TAG = "ToastAppMain";
+
+    private int lastToastEnabledType;
+    private int[] position = new int[2];
+
     private Button buttonUp;
     private Button buttonDown;
     private Button buttonLeft;
     private Button buttonRight;
-    private int lastToastEnabledType;
+
+    private Button fireSimpleToast;
+    private Button fireCustomToast;
+
+    private Toast toast;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,12 +34,55 @@ public class MainActivity extends AppCompatActivity {
 
         // Recovering buttons references
         buttonUp = findViewById(R.id.button_up);
-        buttonDown = findViewById(R.id.button_down);
-        buttonLeft = findViewById(R.id.button_left);
-        buttonRight = findViewById(R.id.button_right);
+        buttonUp.setOnClickListener(this);
 
-        posX = 0;
-        posY = 0;
+        buttonDown = findViewById(R.id.button_down);
+        buttonDown.setOnClickListener(this);
+
+        buttonLeft = findViewById(R.id.button_left);
+        buttonLeft.setOnClickListener(this);
+
+        buttonRight = findViewById(R.id.button_right);
+        buttonRight.setOnClickListener(this);
+
+        fireSimpleToast = findViewById(R.id.button_simple_toast);
+        fireSimpleToast.setOnClickListener(this);
+
+        fireCustomToast = findViewById(R.id.button_custom_toast);
+        fireCustomToast.setOnClickListener(this);
+    }
+
+    // There are two common ways of listening to a click:
+    // 1. Create a method and add it in xml or
+    // 2. Implement onClick passing this as parameter.
+   @Override
+    public void onClick(View v) {
+        switch(v.getId()) {
+            case R.id.button_simple_toast:
+                enableButtons();
+                placeToast(R.id.button_simple_toast);
+                break;
+            case R.id.button_custom_toast:
+                enableButtons();
+                placeToast(R.id.button_custom_toast);
+                break;
+            case R.id.button_up:
+                position[1] -= 150;
+                placeToast(R.id.button_up);
+                break;
+            case R.id.button_down:
+                position[1] += 150;
+                placeToast(R.id.button_down);
+                break;
+            case R.id.button_left:
+                position[0] -= 150;
+                placeToast(R.id.button_left);
+                break;
+            case R.id.button_right:
+                position[0] += 150;
+                placeToast(R.id.button_right);
+                break;
+        }
     }
 
     public void enableButtons() {
@@ -45,44 +94,27 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void fireToast(View v) {
-        enableButtons();
-        Toast.makeText(getApplicationContext(), "Simple toast!", Toast.LENGTH_LONG).show();
-        lastToastEnabledType = SIMPLE_TOAST;
+    private void resetToastPosition() {
+        position[0] = 0;
+        position[1] = 800;
     }
 
-    public void fireCustomToast(View v) {
-        enableButtons();
-
-        LayoutInflater inflater = getLayoutInflater();
-        View layout = inflater.inflate(R.layout.custom_toast, (ViewGroup) findViewById(R.id.custom_toast_container));
-
-        toast = new Toast(getApplicationContext());
-        toast.setDuration(Toast.LENGTH_LONG);
-        toast.setView(layout);
-        toast.show();
-
-        lastToastEnabledType = CUSTOM_TOAST;
-    }
-
-    public void moveUp(View v) {
-        posY += 10;
-
-        if (lastToastEnabledType == SIMPLE_TOAST) {
-            Toast.makeText(getApplicationContext(), "Simple toast!", Toast.LENGTH_LONG).show();
-        } else {
-
+    private void placeToast(int id) {
+        if (id == R.id.button_simple_toast) {
+            toast = Toast.makeText(getApplicationContext(), "Simple toast!", Toast.LENGTH_SHORT);
+            resetToastPosition();
+        } else if (id == R.id.button_custom_toast) {
+            toast = new Toast(getApplicationContext());
+            LayoutInflater inflater = getLayoutInflater();
+            View layout = inflater.inflate(R.layout.custom_toast, (ViewGroup) findViewById(R.id.custom_toast_container));
+            toast.setView(layout);
+            toast.setDuration(Toast.LENGTH_SHORT);
+            resetToastPosition();
         }
 
-        toast.setGravity(Gravity.NO_GRAVITY, posX, posY);
-    }
-
-    public void moveDown(View view) {
-    }
-
-    public void moveRight(View view) {
-    }
-
-    public void moveLeft(View view) {
+        if (!(id == R.id.button_simple_toast || id == R.id.button_custom_toast)) {
+            toast.setGravity(Gravity.NO_GRAVITY, position[0], position[1]);
+        }
+        toast.show();
     }
 }
